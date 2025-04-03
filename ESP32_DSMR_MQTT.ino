@@ -163,13 +163,13 @@ void loop(){
     // If message CRC is equal to calculated CRC, parse the telegram (update telegram objects)
     if (messageCRC_int == crc.getCrc()){
       #ifdef DEBUG
-        Serial.println("Parsing Telegram")
+        Serial.println("Parsing Telegram");
       #endif
       parse_telegram(p1Telegram.get_telegram());  //This updates the telegram objects every time a new p1 message is received
     }
 
     #ifdef DEBUG
-      Serial.println("Resetting Telegram and CRC")
+      Serial.println("Resetting Telegram and CRC");
     #endif
     p1Telegram.reset_telegram();
     crc.resetCrc();
