@@ -2,11 +2,11 @@
 struct TelegramDecodedObject
 {
   String name;
-  long value;
   char code[16];
   char startChar = '(';
   char endChar = ')';
-  bool sendData = true;
+  char value[VALUE_CHAR_ARRAY_LENGTH];
+  bool sendData = false;
 };
 
 
@@ -26,24 +26,24 @@ void setupDataReadout() {
   telegramObjects[1].endChar = '*';
 
   telegramObjects[2].name = "production_tarif_1";
-  strcpy(telegramObjects[0].code, "1-0:2.8.1");
+  strcpy(telegramObjects[2].code, "1-0:2.8.1");
   telegramObjects[2].endChar = '*';
 
   // 1-0:1.8.2(000560.157*kWh)
   // 1-0:1.8.2 = Elektra verbruik hoog tarief (DSMR v5.0)
   telegramObjects[3].name = "production_tarif_2";
-  strcpy(telegramObjects[1].code, "1-0:2.8.2");
+  strcpy(telegramObjects[3].code, "1-0:2.8.2");
   telegramObjects[3].endChar = '*';
 
   // 1-0:1.7.0(00.424*kW) Actueel verbruik
   // 1-0:1.7.x = Electricity consumption actual usage (DSMR v5.0)
   telegramObjects[4].name = "power_used";
-  strcpy(telegramObjects[2].code, "1-0:1.7.0");
+  strcpy(telegramObjects[4].code, "1-0:1.7.0");
   telegramObjects[4].endChar = '*';
 
   // 1-0:2.7.0(00.000*kW) Actuele teruglevering (-P) in 1 Watt resolution
   telegramObjects[5].name = "power_produced";
-  strcpy(telegramObjects[3].code, "1-0:2.7.0");
+  strcpy(telegramObjects[5].code, "1-0:2.7.0");
   telegramObjects[5].endChar = '*';
 
   // 1-0:21.7.0(00.378*kW)
@@ -137,7 +137,7 @@ void setupDataReadout() {
   // 0-2:24.2.1(241229182503W)(00949.162*m3)
   // 0-2:24.2.1 = Gas (DSMR v5.0) on Dutch meters
   telegramObjects[7].name = "gas_meter_m3";
-  strcpy(telegramObjects[7].code, "0-1:24.2.3");
+  strcpy(telegramObjects[7].code, "0-1:24.2.1");
   telegramObjects[7].endChar = '*';
 
 #ifdef DEBUG

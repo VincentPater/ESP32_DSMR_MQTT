@@ -6,14 +6,15 @@
 #include "settings.h"
 #include "crc16.h"
 #include "SmartMeterSerialReader.h"
+#include "TelegramDecodedObject.h"
 
 
 
 
 // Global Variables
-long LAST_RECONNECT_ATTEMPT = 0;
-long LAST_UPDATE_SENT = 0;
-long LAST_FULL_UPDATE_SENT = 0;
+uint64_t LAST_RECONNECT_ATTEMPT = 0;
+uint64_t LAST_UPDATE_SENT = 0;
+uint64_t LAST_FULL_UPDATE_SENT = 0;
 
 char WIFI_SSID[32] = WIFI_SSID_STRING;
 char WIFI_PASS[32] = WIFI_PASSWORD;
@@ -22,6 +23,8 @@ char MQTT_HOST[64] = MQTT_SERVER_IP;
 char MQTT_PORT[6] = MQTT_PORT_NUM;
 char MQTT_USER[32] = MQTT_USER_NAME;
 char MQTT_PASS[32] = MQTT_PASSWORD;
+
+uint64_t currentTime = 0;
 
 
 /***********************************
@@ -83,7 +86,7 @@ void setup() {
 void loop(){
 
   // Time keeping
-  long now = millis();
+  currentTime = esp_timer_get_time();
 
 
   // Check WiFi Status
@@ -108,8 +111,8 @@ void loop(){
 
   // Check if new MQTT messages are available (does not send data)
     if (!mqttClient.connected()) {
-    if (now - LAST_RECONNECT_ATTEMPT > 5000) {
-      LAST_RECONNECT_ATTEMPT = now;
+    if (currentTime - LAST_RECONNECT_ATTEMPT > 5000000) {
+      LAST_RECONNECT_ATTEMPT = currentTime;
 
       if (!mqttReconnect()) {
         #ifdef DEBUG
@@ -137,88 +140,59 @@ void loop(){
   // Check if CRC is correct -> Valid Telegram
   if (p1Telegram.telegramComplete){
   #ifdef DEBUG
+  // Prints the entire telegram
     Serial.print(p1Telegram.get_telegram());
+    Serial.println(p1Telegram.get_CRC());
     Serial.println();
   #endif
 
-    crc.processBuffer(p1Telegram.get_telegram(), p1Telegram.get_curLenTelegram()); //strlen(buffer)
+    // Calculate CRC from telegram
+    crc.processBuffer(p1Telegram.get_telegram(), p1Telegram.get_curLenTelegram());
+
+  #ifdef DEBUG
     Serial.println("Calculated CRC:");
     Serial.println(crc.getCrc(),HEX);
     
     Serial.println("Actual CRC:");
     Serial.println(p1Telegram.get_CRC());
+  #endif
 
-    int endCRC_int = strtoul(p1Telegram.get_CRC(),NULL,16);
-    if (endCRC_int == crc.getCrc()){
-      Serial.println("Valid CRC");
-    }else{
-      Serial.println("Invalid CRC");
+    // Turn CRS string into unsigned long
+    int messageCRC_int = strtoul(p1Telegram.get_CRC(),NULL,16);
+
+    // If message CRC is equal to calculated CRC, parse the telegram (update telegram objects)
+    if (messageCRC_int == crc.getCrc()){
+      #ifdef DEBUG
+        Serial.println("Parsing Telegram")
+      #endif
+      parse_telegram(p1Telegram.get_telegram());  //This updates the telegram objects every time a new p1 message is received
     }
 
-    // Temporary clear
-    Serial.println("Resetting Telegram");
+    #ifdef DEBUG
+      Serial.println("Resetting Telegram and CRC")
+    #endif
     p1Telegram.reset_telegram();
-
-    Serial.println("Resetting CRC");
     crc.resetCrc();
   }
 
-  // Extract wanted data from Telegram into struct
-
-
-  // Flush telegram
-  if (false){
-    p1Telegram.reset_telegram();
-  }
 
 
   // At desired interval, publish data to MQTT broker
+  // Check if we want a full update of all the data including the unchanged data.
+  if (currentTime - LAST_FULL_UPDATE_SENT >= UPDATE_FULL_INTERVAL){
+    for (int i = 0; i < NUMBER_OF_READOUTS; i++){
+      telegramObjects[i].sendData = true;
+      LAST_FULL_UPDATE_SENT = esp_timer_get_time(); // Time in microseconds!
+    }
+  }
+
+  if (currentTime - LAST_UPDATE_SENT >= UPDATE_INTERVAL){
+    //If there are certain topics that you want to send every time (this case Power [kW] consumed and produced), add them here
+    telegramObjects[4].sendData = true;
+    telegramObjects[5].sendData = true;
+    sendDataToBroker();
+    LAST_UPDATE_SENT = esp_timer_get_time(); // Time in microseconds!
+  }
 
 
-
-
-
-
-}
-
-
-
-
-
-/**
-   Over the Air update setup
-*/
-void setupOTA() {
-  ArduinoOTA
-    .onStart([]() {
-      String type;
-      if (ArduinoOTA.getCommand() == U_FLASH)
-        type = "sketch";
-      else  // U_SPIFFS
-        type = "filesystem";
-
-      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-      Serial.println("Start updating " + type);
-    })
-    .onEnd([]() {
-      Serial.println("\nEnd");
-    })
-    .onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-    })
-    .onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR)
-        Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR)
-        Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR)
-        Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR)
-        Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR)
-        Serial.println("End Failed");
-    });
-
-  ArduinoOTA.begin();
 }

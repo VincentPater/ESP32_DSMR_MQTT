@@ -8,7 +8,7 @@
  * The code in this module generates the crc for a block of data.
  *
  * Version: 1.1
- * Original Author: Joao Alves <jpralves@gmail.com>
+ * Original Author: Joao Alves <jpralves@gmail.com> 
  * Required files: crc16.cpp, crc16.h
  *
  * History:
