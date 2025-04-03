@@ -1,5 +1,5 @@
 # ESP32_DSMR_MQTT
-Software for the ESP32 (I use an official ESP32C6 DevKit.) that decodes and sends P1 smart meter (DSMR) data to a MQTT broker, with the possibility for Over The Air (OTA) firmware updates.
+Software for the ESP32 (I use an official ESP32C6 DevKit.) that decodes and sends P1 smart meter (DSMR 5.0 - maybe older versions too?) data to a MQTT broker, with the possibility for Over The Air (OTA) firmware updates.
 
 ## About this fork
 This fork was based on the work done by [Bartwo](https://github.com/bartwo/esp32_p1meter/tree/master).
@@ -9,10 +9,16 @@ Try as I might, I could not get it to work.
 In this fork, I've reused some parts of the original code and I have adjusted or rewritten others.
 - For the serial communication, I've written a class to handle incomming Serial data. This simplifies the main script.
 - For CRC checking, I've made a combination of the [CRC Library by jpralves](https://github.com/jpralves/crc16/tree/master) and a [Python script on Tweakers by Kristofferson](https://gathering.tweakers.net/forum/list_messages/2250716)
-
-At this point in time, I have yet to:
-- Read the desired data from the telegram into the MQTT topics
+- New function to read the desired data from the telegram into the MQTT topics
 - Implement various timing for sending updates to the MQTT broker (1 sec. for power consumption/production and 1 min. for the meter values).
+
+_Note: Although my `landis+Gyr E350 - E0046` says its (D)SMR 5.0 and it does send a telegram every second, the data in the message (except for timestamp and CRC) only update every 10 seconds. I'll have to contact Liander about this..._
+
+
+
+Still to-do:
+- Code Cleanup
+- More robust Topic selection. If used types the wrong topic-code, ESP will panic and crash when parsing telegram
 
 ## Setup
 This setup requires:
@@ -31,7 +37,7 @@ Setting up your Arduino IDE:
 - Write to your device via USB the first time, you can do it OTA all times thereafter.
 
 ### Circuit diagram
-_Note: I have only tested this on the `landis+Gyr e350`._
+_Note: I have only tested this on the `landis+Gyr E350 - E0046`._
 
 Contrary to other ESPs the C6 does not have a UART2/Serial2. Uart1 can however be assigned most GPIO pins. 
 I used GPIO 6 for RXD and GPIO 7 (in software only) for TXD.
