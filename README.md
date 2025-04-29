@@ -77,7 +77,7 @@ But all the metrics you need are easily added using the `setupDataReadout()` met
 
 ### Home Assistant Configuration
 
-Use this [example](https://raw.githubusercontent.com/daniel-jong/esp8266_p1meter/master/assets/p1_sensors.yaml) for home assistant's `sensor.yaml`
+Use this [example](https://github.com/VincentPater/ESP32_DSMR_MQTT/blob/master/assets/p1_sensors.yaml) for home assistant's `sensor.yaml`
 
 
 ## Thanks to previous people who worked on this project
