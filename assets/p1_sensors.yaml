@@ -39,7 +39,7 @@ mqtt:
       device_class: energy
       state_class: measurement
       unit_of_measurement: kWh
-      state_topic: "woonhuis/p1meter/consumption_tarif_1"
+      state_topic: "woonhuis/p1meter/production_tarif_1"
       value_template: "{{ value|float }}"
       
     - name: "Woonhuis Production tarif 2"
@@ -47,7 +47,7 @@ mqtt:
       device_class: energy
       state_class: measurement
       unit_of_measurement: kWh
-      state_topic: "woonhuis/p1meter/consumption_tarif_2"
+      state_topic: "woonhuis/p1meter/production_tarif_2"
       value_template: "{{ value|float }}"
       
     - name: "Woonhuis Gas Used"
