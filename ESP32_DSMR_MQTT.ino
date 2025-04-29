@@ -13,7 +13,6 @@
 
 // Global Variables
 uint64_t LAST_RECONNECT_ATTEMPT = 0;
-uint64_t LAST_UPDATE_SENT = 0;
 uint64_t LAST_FULL_UPDATE_SENT = 0;
 
 char WIFI_SSID[32] = WIFI_SSID_STRING;
@@ -173,12 +172,17 @@ void loop(){
     #endif
     p1Telegram.reset_telegram();
     crc.resetCrc();
+
+
+    // Force update with every message for these topics
+    // If there are certain topics that you want to send every time (this case Power [kW] consumed and produced), add them here
+    telegramObjects[4].sendData = true;
+    telegramObjects[5].sendData = true;
   }
 
 
 
   // At desired interval, publish data to MQTT broker
-  // Check if we want a full update of all the data including the unchanged data.
   if (currentTime - LAST_FULL_UPDATE_SENT >= UPDATE_FULL_INTERVAL){
     for (int i = 0; i < NUMBER_OF_READOUTS; i++){
       telegramObjects[i].sendData = true;
@@ -186,13 +190,7 @@ void loop(){
     }
   }
 
-  if (currentTime - LAST_UPDATE_SENT >= UPDATE_INTERVAL){
-    //If there are certain topics that you want to send every time (this case Power [kW] consumed and produced), add them here
-    telegramObjects[4].sendData = true;
-    telegramObjects[5].sendData = true;
-    sendDataToBroker();
-    LAST_UPDATE_SENT = esp_timer_get_time(); // Time in microseconds!
-  }
-
+  // Sends all data to broker (if sendData == true)
+  sendDataToBroker();
 
 }
