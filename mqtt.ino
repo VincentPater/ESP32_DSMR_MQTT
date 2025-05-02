@@ -8,13 +8,20 @@ bool mqttReconnect() {
   while (!mqttClient.connected() && MQTT_RECONNECT_RETRIES < MQTT_MAX_RECONNECT_TRIES) {
     MQTT_RECONNECT_RETRIES++;
 
+    #ifdef STATUSLED
+    rgbLedWrite(RGB_BUILTIN, RGB_BRIGHTNESS, 0, 0);  // Red
+    #endif
+    #ifdef DEBUG
+    Serial.println("Connection Lost to MQTT server");
+    #endif
+
     if (mqttClient.connect(HOSTNAME, MQTT_USER, MQTT_PASS)) {
-      char *message = new char[16 + strlen(HOSTNAME) + 1];
-      strcpy(message, "p1 meter alive: ");
-      strcat(message, HOSTNAME);
-      mqttClient.publish("hass/status", message);
+      // char *message = new char[16 + strlen(HOSTNAME) + 1];
+      // strcpy(message, "p1 meter alive: ");
+      // strcat(message, HOSTNAME);
+      // mqttClient.publish("hass/status", message);
     } else {
-      delay(5000);
+      delay(1000);
     }
   }
 
@@ -22,6 +29,13 @@ bool mqttReconnect() {
     return false;
   }
 
+  // Connection is re-established
+  #ifdef DEBUG
+  Serial.println("Reconnected to MQTT server");
+  #endif
+  #ifdef STATUSLED
+  rgbLedWrite(RGB_BUILTIN, 0, RGB_BRIGHTNESS, 0);  // Green
+  #endif
   return true;
 }
 

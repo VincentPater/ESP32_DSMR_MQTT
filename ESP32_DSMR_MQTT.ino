@@ -65,11 +65,17 @@ void setup() {
 
   delay(3000);
 
+  // Setup Data objects (in TelegramDecodedObject.h)
   setupDataReadout();
 
+  // Setup OTA
+  #ifdef ENABLEOTA
   setupOTA();
+  #endif
 
   mqttClient.setServer(MQTT_HOST, atoi(MQTT_PORT));
+  mqttClient.setSocketTimeout(MQTT_TIMEOUT);
+  mqttClient.setKeepAlive(MQTT_TIMEOUT);
   blinkLed(5, 500);  // Blink 5 times to indicate end of setup
 
 #ifdef DEBUG
@@ -104,7 +110,9 @@ void loop(){
 
 
   // Check if there are new OTA requests
+  #ifdef ENABLEOTA
   ArduinoOTA.handle();
+  #endif
 
 
 
