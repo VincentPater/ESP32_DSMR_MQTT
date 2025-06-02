@@ -1,7 +1,7 @@
 # Example of sensors to be used in Home Assistant
 
 mqtt:
-  sensor:     
+  sensor:
     - name: "Woonhuis Power Used"
       unique_id: 'sensor.woonhuispowerused'
       device_class: power
@@ -21,7 +21,7 @@ mqtt:
     - name: "Woonhuis Consumption tarif 1"
       unique_id: 'sensor.woonhuisconsumption-t1'
       device_class: energy
-      state_class: measurement
+      state_class: total_increasing
       unit_of_measurement: kWh
       state_topic: "woonhuis/p1meter/consumption_tarif_1"
       value_template: "{{ value|float }}"
@@ -29,7 +29,7 @@ mqtt:
     - name: "Woonhuis Consumption tarif 2"
       unique_id: 'sensor.woonhuisconsumption-t2'
       device_class: energy
-      state_class: measurement
+      state_class: total_increasing
       unit_of_measurement: kWh
       state_topic: "woonhuis/p1meter/consumption_tarif_2"
       value_template: "{{ value|float }}"
@@ -37,7 +37,7 @@ mqtt:
     - name: "Woonhuis Production tarif 1"
       unique_id: 'sensor.woonhuisproduction-t1'
       device_class: energy
-      state_class: measurement
+      state_class: total_increasing
       unit_of_measurement: kWh
       state_topic: "woonhuis/p1meter/production_tarif_1"
       value_template: "{{ value|float }}"
@@ -45,7 +45,7 @@ mqtt:
     - name: "Woonhuis Production tarif 2"
       unique_id: 'sensor.woonhuisproduction-t2'
       device_class: energy
-      state_class: measurement
+      state_class: total_increasing
       unit_of_measurement: kWh
       state_topic: "woonhuis/p1meter/production_tarif_2"
       value_template: "{{ value|float }}"
@@ -53,8 +53,9 @@ mqtt:
     - name: "Woonhuis Gas Used"
       unique_id: 'sensor.woonhuisgas'
       device_class: gas
-      state_class: measurement
+      state_class: total_increasing
       unit_of_measurement: "m³"
       state_topic: "woonhuis/p1meter/gas_meter_m3"
-      value_template: "{{ value|float }}"  
+      value_template: "{{ value|float }}" 
+
 
